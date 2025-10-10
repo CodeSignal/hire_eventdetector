@@ -123,7 +123,7 @@ class ModelTrainer:
             self.val_losses[model_name] = history.history['val_loss']
 
         losses_test_data: Dict[str, tf.keras.Model] = {}
-        min_loss = np.Inf
+        min_loss = np.inf
         for model_name, model in created_models.items():
             logger_models.info(f"Evaluating model {model_name} on test data")
             loss = model.evaluate(self.data_splitter.test_x, self.data_splitter.test_y, batch_size=self.batch_size)

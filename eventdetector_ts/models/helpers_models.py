@@ -47,7 +47,7 @@ class CustomEarlyStopping(tf.keras.callbacks.Callback):
         self.best_weights = None
         self.stopped_epoch = 0
         self.best_epoch = 0
-        self.best = np.Inf
+        self.best = np.inf
 
     def on_epoch_end(self, epoch, logs=None):
         """
@@ -153,7 +153,7 @@ def custom_cross_val_score(model: tf.keras.Model, x: np.ndarray, y: np.ndarray, 
                            callbacks: list) -> np.ndarray:
     """
     A function to perform custom cross-validation for a Keras model.
-    
+
     Args:
         model: A Keras model.
         x: The input data.
