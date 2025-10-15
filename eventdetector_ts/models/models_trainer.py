@@ -156,7 +156,10 @@ class ModelTrainer:
             logger_models.info(f"Current model to be saved on the disk is {model_name}")
             model_name_with_ext = f"{model_name}.keras"
             model_path = os.path.join(output_dir, MODELS_DIR, model_name_with_ext)
-            model.save(model_path)
+
+            # Save in Keras 3 compatible format
+            model.save(model_path, save_format='keras')
+
         logger_models.info("Models saved successfully.")
 
     def train_meta_model(self, type_training: str, hyperparams_mm_network: Tuple[int, int], output_dir: str) \
@@ -212,7 +215,7 @@ class ModelTrainer:
 
             path = os.path.join(output_dir, MODELS_DIR)
             model_path = os.path.join(path, META_MODEL_NETWORK)
-            keras_model.save(model_path)
+            keras_model.save(model_path, save_format='keras')
             logger_models.info("MetaModel network saved successfully.")
             self.train_loss_meta_model = history.history['loss']
             self.val_loss_meta_model = history.history['val_loss']

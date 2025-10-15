@@ -15,10 +15,49 @@ from eventdetector_ts.optimization.event_extraction_pipeline import get_peaks, c
 from eventdetector_ts.prediction import logger
 
 
+def load_model_with_fallback(model_path: str) -> tf.keras.Model:
+    """
+    Load a Keras model with fallback mechanisms for different formats.
+
+    Args:
+        model_path (str): Path to the model file
+
+    Returns:
+        tf.keras.Model: Loaded model
+    """
+    try:
+        # Try loading with Keras 3 format first
+        return tf.keras.models.load_model(model_path)
+    except ValueError as e:
+        if "File format not supported" in str(e):
+            # Try loading as SavedModel format
+            try:
+                saved_model = tf.saved_model.load(model_path)
+                # Convert SavedModel to Keras model
+                class SavedModelWrapper(tf.keras.Model):
+                    def __init__(self, saved_model):
+                        super().__init__()
+                        self.saved_model = saved_model
+
+                    def call(self, inputs):
+                        return self.saved_model(inputs)
+
+                return SavedModelWrapper(saved_model)
+            except Exception:
+                # If all else fails, try H5 format
+                h5_path = model_path.replace('.keras', '.h5')
+                if os.path.exists(h5_path):
+                    return tf.keras.models.load_model(h5_path)
+                else:
+                    raise e
+        else:
+            raise e
+
+
 def load_config_file(path: str) -> Dict:
     """
      Load config file of the meta-model.
-     
+
     Args:
         path (str): Where the config file is stored
 
@@ -49,8 +88,11 @@ def load_models(model_keys: List[str], output_dir: str) -> List[tf.keras.Model]:
     models: List[tf.keras.Model] = []
     for key in model_keys:
         path = os.path.join(output_dir, MODELS_DIR)
+        # Add .keras extension if not already present
+        if not key.endswith('.keras'):
+            key = f"{key}.keras"
         path = os.path.join(path, key)
-        models.append(tf.keras.models.load_model(path))
+        models.append(load_model_with_fallback(path))
     return models
 
 
@@ -58,8 +100,8 @@ def apply_scaling(x: np.ndarray, config_data: Dict) -> np.ndarray:
     """
     Scaling input data according to the stored scalers.
     Args:
-        x (np.ndarray): Input data to be scaled 
-        config_data (Dict): Configuration Data 
+        x (np.ndarray): Input data to be scaled
+        config_data (Dict): Configuration Data
 
     Returns:
         Scaled data.
@@ -95,8 +137,13 @@ def load_meta_model(output_dir: str) -> Tuple[tf.keras.Model, Any]:
         tf.keras.Model, StanderScaler
     """
     path = os.path.join(output_dir, MODELS_DIR)
-    path = os.path.join(path, META_MODEL_NETWORK)
-    model = tf.keras.models.load_model(path)
+    # Add .keras extension if not already present
+    meta_model_name = META_MODEL_NETWORK
+    if not meta_model_name.endswith('.keras'):
+        meta_model_name = f"{meta_model_name}.keras"
+    path = os.path.join(path, meta_model_name)
+    model = load_model_with_fallback(path)
+
     scalers_dir = os.path.join(output_dir, SCALERS_DIR)
     scaler_path = os.path.join(scalers_dir, f'{META_MODEL_SCALER}.joblib')
     scaler = joblib.load(scaler_path)
@@ -109,7 +156,7 @@ def predict(dataset: pd.DataFrame, path: str) -> Tuple[List, np.ndarray, np.ndar
     Generates output predictions for the input dataset
     Args:
         dataset (pd.DataFrame): The input dataset.
-        path (str): The path to the created folder by the MetaModel. 
+        path (str): The path to the created folder by the MetaModel.
 
     Returns:
         Tuple[List, np.ndarray, np.ndarray]: Predicted events, predicted Op and filtered predicted Op
