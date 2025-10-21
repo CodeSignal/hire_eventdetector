@@ -61,18 +61,29 @@ env\Scripts\activate.bat  # for Windows
 <pre><code>pip install -r requirements.txt</code></pre>
 
 ## Quickstart Examples
-### Data sets
-To quickly get started with `EventDetector`, follow the steps below:
 
-- You can either download the datasets and event catalogs manually or use the built-in methods for the desired application:
-  - Bow Shock Crossings: `eventdetector_ts.load_martian_bow_shock()`
-      - [bow_shock_dataset](https://archive.org/download/martian_bow_shock_dataset/martian_bow_shock_dataset.pkl)
-      - [bow_shock_events](https://archive.org/download/martian_bow_shock_events/martian_bow_shock_events.csv)
-  - Credit Card Frauds: `eventdetector_ts.load_credit_card_fraud()`
-      - [credit_card_dataset](https://archive.org/download/credit_card_fraud_dataset/credit_card_fraud_dataset.csv)
-      - [credit_card_events](https://archive.org/download/credit_card_fraud_events/credit_card_fraud_events.csv)
-  - NLP:
-      - [Keyword extraction and the identification of tags for part-of-speech tagging (POS) in textual data.](https://github.com/menouarazib/InformationRetrievalInNLP)
+### Data Format
+
+Input time series data:
+
+```
+# pandas DataFrame with datetime index
+                    feature1  feature 2
+2020-12-04T00:00:00  1.234  5.0
+2020-12-04T00:00:01  1.456  5.1
+2020-12-04T00:00:02  1.789  5.5
+2020-12-04T00:00:03  2.123  5.8
+```
+
+Annotated events data format:
+
+```
+# pandas DataFrame with start/end columns
+        start                    end
+0  2020-12-04T00:01:02  2020-12-04T00:01:42
+1  2020-12-04T00:29:45  2020-12-04T00:30:20
+2  2020-12-04T00:30:55  2020-12-04T00:31:28
+```
 
 ### Code Implementations:
   - Credit Card Frauds:
@@ -102,7 +113,7 @@ meta_model = MetaModel(output_dir="mex_bow_shocks", dataset=dataset, events=even
 
 meta_model.fit()
 
-``` 
+```
 
 ### Performance Evaluation and Outputs
 
@@ -162,7 +173,7 @@ predicted_events, predicted_op, filtered_predicted_op = predict(dataset=dataset_
 # Plot the predictions
 plot_prediction(predicted_op=predicted_op, filtered_predicted_op=filtered_predicted_op)
 ```
- 
+
 ## Documentation
 For a deeper understanding of the parameters presented below,
 please refer to our paper available at this [link](https://osf.io/uabjg).
@@ -216,7 +227,7 @@ For a complete description of the required and optional arguments, please refer 
 | `last_act_func`             | str                                      | Activation function for the final layer of each model. If set to `None`, no activation will be applied (i.e., "linear" activation: `a(x) = x`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | "sigmoid"                              |
 
 #### The method `fit`
-The method `fit` calls automatically the following methods: 
+The method `fit` calls automatically the following methods:
 ##### Prepare data for computing the overlapping parameter `op`
 The second thing to do is to prepare the events and the dataset for computing `op`:
 ```python
@@ -250,8 +261,8 @@ If you use our package, please cite the following papers:
 ```bash
 @INPROCEEDINGS{10459857,
   author={Azib, Menouar and Renard, Benjamin and Garnier, Philippe and Génot, Vincent and André, Nicolas},
-  booktitle={2023 International Conference on Machine Learning and Applications (ICMLA)}, 
-  title={A Comprehensive Python Library for Deep Learning-Based Event Detection in Multivariate Time Series Data}, 
+  booktitle={2023 International Conference on Machine Learning and Applications (ICMLA)},
+  title={A Comprehensive Python Library for Deep Learning-Based Event Detection in Multivariate Time Series Data},
   year={2023},
   volume={},
   number={},
@@ -277,4 +288,3 @@ In our future works, we aim to enhance our model’s capabilities by predicting 
 
 <a id="6"> [4] I. K. Cheng, N. Achilleos and A. Smith, “Automated bow shock and magnetopause boundary detection with Cassini using threshold and deep learning methods,” Front. Astron. Space Sci., vol. 9, 2022, doi: 10.3389/fspas.2022.1016453.
 </a>
-
